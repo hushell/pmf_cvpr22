@@ -87,7 +87,7 @@ def main(args):
     ##############################################
     # Optimizer & scheduler & criterion
     if args.fp16:
-        scale = 75 / 512.0
+        scale = 1 / 8 # the default lr is for 8 GPUs
         linear_scaled_lr = args.lr * utils.get_world_size() * scale
         args.lr = linear_scaled_lr
 

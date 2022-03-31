@@ -50,5 +50,5 @@ It is recommended to run on a single GPU first by specifying `args.device = cuda
 ### CIFAR-FS and Mini-ImageNet
 We use `args.nSupport` to set the number of shots. For example, 5-way-5-shot training is the following:
 ```
-python train.py --output outputs/your_experiment_name --dataset mini_imagenet --epoch 100 --lr 1e-4 --arch dino_base_patch16 --device cuda:1 --nSupport 5 
+python train.py --output outputs/your_experiment_name --dataset cifar_fs --epoch 100 --lr 1e-4 --arch dino_small_patch16 --device cuda:1 --nSupport 5 --fp16
 ```
