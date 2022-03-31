@@ -1,0 +1,10 @@
+torch>=1.6
+numpy
+tqdm
+tensorboard
+ml-collections
+timm
+ftfy
+wget
+tabulate
+tables
