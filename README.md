@@ -16,7 +16,9 @@ sh download_miniimagenet.sh
 To use these two datasets, set `args.dataset = cifar_fs` or `args.dataset = mini_imagenet`.
 
 ### Meta-Dataset
-We have a pytorch episodic dataset of [Meta-Dataset](https://github.com/google-research/meta-dataset).
+We implement a pytorch version of [Meta-Dataset](https://github.com/google-research/meta-dataset).
+Our code is based on [mboudiaf's pytorch meta-dataset](https://github.com/mboudiaf/pytorch-meta-dataset).
+
 The dataset has 10 domains, 4000+ classes. Episodes are formed in various-way-various-shot fashion.
 The images are stored class-wise in h5 files (converted from the origianl tfrecords).
 To use this dataset, set `args.dataset = full_meta_dataset` and 
@@ -50,5 +52,5 @@ It is recommended to run on a single GPU first by specifying `args.device = cuda
 ### CIFAR-FS and Mini-ImageNet
 We use `args.nSupport` to set the number of shots. For example, 5-way-5-shot training is the following:
 ```
-python train.py --output outputs/your_experiment_name --dataset cifar_fs --epoch 100 --lr 1e-4 --arch dino_small_patch16 --device cuda:1 --nSupport 5 --fp16
+python train.py --output outputs/your_experiment_name --dataset cifar_fs --epoch 100 --lr 5e-5 --arch dino_small_patch16 --device cuda:0 --nSupport 5 --fp16
 ```
