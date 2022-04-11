@@ -9,6 +9,7 @@ from .samplers import RASampler
 from .episodic_dataset import EpisodeDataset, EpisodeJSONDataset
 from .meta_val_dataset import MetaValDataset
 from .meta_h5_dataset import FullMetaDatasetH5
+from .meta_dataset.utils import Split
 
 
 def get_sets(args):
