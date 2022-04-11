@@ -7,6 +7,9 @@ pip install -r requirements.txt
 ```
 
 ## Datasets
+We provide dataset classes and DDP dataloaders for CIFAR-FS, Mini-ImageNet and Meta-Dataset. 
+For more details, check [datasets/__init__.py:get_sets()](datasets/__init__.py#L15) and [datasets/__init__.py:get_loaders()](datasets/__init__.py#L70).
+
 ### CIFAR-FS and Mini-ImageNet
 ```
 cd scripts
@@ -26,7 +29,7 @@ To use this dataset, set `args.dataset = full_meta_dataset` and `args.data_path 
 We will soon provide a link for downloading h5 files.
 
 
-## Meta-Training
+## Pre-training
 We support ProtoNet training with various pretrained backbones:
 ```
 args.arch = 'vit_base_patch16_224_in21k'
@@ -39,12 +42,15 @@ args.arch = 'vit_base_patch16_224_in21k'
           = 'dino_xcit_medium_24_p16'
           = 'dino_xcit_medium_24_p8'
 ```
-It is recommended to run on a single GPU first by specifying `args.device = cuda:i`, where i is the GPU id. 
+
+
+## Meta-Training
 
 ### Meta-training on CIFAR-FS and Mini-ImageNet
+It is recommended to run on a single GPU first by specifying `args.device = cuda:i`, where i is the GPU id. 
 We use `args.nSupport` to set the number of shots. For example, 5-way-5-shot training is the following:
 ```
-python train.py --output outputs/your_experiment_name --dataset cifar_fs --epoch 100 --lr 5e-5 --arch dino_small_patch16 --device cuda:0 --nSupport 5 --fp16
+python main.py --output outputs/your_experiment_name --dataset cifar_fs --epoch 100 --lr 5e-5 --arch dino_small_patch16 --device cuda:0 --nSupport 5 --fp16
 ```
 The minimum GPU memory is 11GB.
 
@@ -56,11 +62,11 @@ ulimit -n 100000 # may need to check `ulimit -Hn` first to know the hard limit
 Various-way-various-shot training (#ways = 5-50, max #query = 10, max #supp = 500, max #supp per class = 100):
 
 ```
-python train.py --output outputs/your_experiment_name --dataset meta_dataset --data-path /path/to/h5/files/ --num_workers 4 --base_sources aircraft cu_birds dtd ilsvrc_2012 omniglot fungi vgg_flower quickdraw --epochs 100 --lr 5e-4 --arch dino_small_patch16 --dist-eval --device cuda:0 --fp16
+python main.py --output outputs/your_experiment_name --dataset meta_dataset --data-path /path/to/h5/files/ --num_workers 4 --base_sources aircraft cu_birds dtd ilsvrc_2012 omniglot fungi vgg_flower quickdraw --epochs 100 --lr 5e-4 --arch dino_small_patch16 --dist-eval --device cuda:0 --fp16
 ```
 The minimum GPU memory is 24GB.
 
-### Meta-training on Meta-Dataset (base domain=ImageNet only)
+### Meta-training on Meta-Dataset (ImageNet only)
 Just replace `--base_sources ...` by `--base_sources ilsvrc_2012`.
 
 ### Multi-GPU DDP on a single machine
@@ -71,7 +77,7 @@ export WORLD_SIZE=1 # total number of machines
 ```
 For example, if you got 8 GPUs, 
 ```
-python -m torch.distributed.launch --nproc_per_node=8 --use_env train.py --output outputs/your_experiment_name --dataset meta_dataset --data-path /path/to/h5/files/ --num_workers 4 --base_sources aircraft cu_birds dtd ilsvrc_2012 omniglot fungi vgg_flower quickdraw --epochs 100 --lr 5e-4 --arch dino_small_patch16 --dist-eval --fp16
+python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --output outputs/your_experiment_name --dataset meta_dataset --data-path /path/to/h5/files/ --num_workers 4 --base_sources aircraft cu_birds dtd ilsvrc_2012 omniglot fungi vgg_flower quickdraw --epochs 100 --lr 5e-4 --arch dino_small_patch16 --dist-eval --fp16
 ```
 
 
