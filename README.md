@@ -1,5 +1,49 @@
-# Pushing the Limits of Simple Pipelines for Few-Shot Learning: External Data and Fine-Tuning Make a Difference
+# P>M>F pipeline for few-shot learning (CVPR2022)
 ---
+
+**Pushing the Limits of Simple Pipelines for Few-Shot Learning: External Data and Fine-Tuning Make a Difference**
+
+*[Shell Xu Hu](https://hushell.github.io/), [Da Li](https://dali-dl.github.io/), [Jan Stühmer](https://scholar.google.com/citations?user=pGukv5YAAAAJ&hl=en), [Minyoung Kim](https://sites.google.com/site/mikim21/) and [Timothy Hospedales](https://homepages.inf.ed.ac.uk/thospeda/)*
+
+
+[[Project page](https://hushell.github.io/pmf/)]
+[[Arxiv]()]
+[[Paper with code]()]
+[[Won 2nd place in NeurIPS-MetaDL-2021]()]
+
+
+If you find our project helpful, please consider cite:
+```
+@inproceedings{hu2022pmf,
+               author = {Hu, Shell Xu
+                         and Li, Da
+                         and St\"uhmer, Jan
+                         and Kim, Minyoung
+                         and Hospedales, Timothy M.},
+               title = {Pushing the Limits of Simple Pipelines for Few-Shot Learning:
+                        External Data and Fine-Tuning Make a Difference},
+               booktitle = {CVPR},
+               year = {2022}
+}
+```
+
+
+## Table of Content
+* [Prerequisites](#prerequisites)
+* [Datasets](#datasets)
+    * [CIFAR-FS and Mini-ImageNet](#cifar-fs-and-mini-imagenet)
+    * [Meta-Dataset](#meta-dataset)
+    * [CDFSL](#cdfsl)
+* [Pre-training](#pre-training)
+* [Meta-training](#meta-training)
+    * [ProtoNet on CIFAR-FS and Mini-ImageNet](#protonet-on-cifar-fs-and-mini-imagenet)
+    * [ProtoNet on Meta-Dataset](#protonet-on-meta-dataset)
+    * [ProtoNet on Meta-Dataset with ImageNet only](#protonet-on-meta-dataset-with-imagenet-only)
+* [Meta-testing](#meta-testing)
+    * [Vanilla](#vanilla)
+    * [Test-time fine-tuning on Meta-Dataset](#test-time-fine-tuning-on-meta-dataset)
+    * [Cross-domain few-shot learning](#cross-domain-few-shot-learning)
+
 
 ## Prerequisites
 ```
@@ -30,23 +74,20 @@ We will soon provide a link for downloading h5 files.
 
 
 ## Pre-training
-We support ProtoNet training with various pretrained backbones:
+We support various pretrained ViT and ResNet50 backbones:
 ```
-args.arch = 'vit_base_patch16_224_in21k'
-          = 'dino_base_patch16'
-          = 'dino_small_patch16'
-          = 'beit_base_patch16_224_pt22k'
-          = 'clip_base_patch16_224'
-          = 'clip_resnet50'
-          = 'dino_resnet50'
-          = 'dino_xcit_medium_24_p16'
-          = 'dino_xcit_medium_24_p8'
+args.arch = 'dino_base_patch16' # DINO self-supervised ViT-base on ImageNet-1k
+          = 'dino_small_patch16' # DINO self-supervised ViT-small on ImageNet-1k
+          = 'beit_base_patch16_224_pt22k' # BERT self-supervised ViT-base on ImageNet-21k
+          = 'clip_base_patch16_224' # ViT-base via CLIP on YFCC-100M
+          = 'clip_resnet50' # ResNet50 via CLIP on YFCC-100M
+          = 'dino_resnet50' # DINO self-supervised ResNet50 on ImageNet-1k
 ```
 
 
 ## Meta-Training
 
-### Meta-training on CIFAR-FS and Mini-ImageNet
+### On CIFAR-FS and Mini-ImageNet
 It is recommended to run on a single GPU first by specifying `args.device = cuda:i`, where i is the GPU id. 
 We use `args.nSupport` to set the number of shots. For example, 5-way-5-shot training is the following:
 ```
@@ -54,7 +95,7 @@ python main.py --output outputs/your_experiment_name --dataset cifar_fs --epoch 
 ```
 The minimum GPU memory is 11GB.
 
-### Meta-training on Meta-Dataset (8 base domains)
+### On Meta-Dataset (8 base domains)
 Since each class is stored in a h5 file, training will open many files. The following command is required before launching the code:
 ```
 ulimit -n 100000 # may need to check `ulimit -Hn` first to know the hard limit
@@ -82,3 +123,9 @@ python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --output
 
 
 ## Meta-Testing
+
+### Default 
+
+### Test-time fine-tuning on Meta-Dataset
+
+### Cross-domain few-shot learning

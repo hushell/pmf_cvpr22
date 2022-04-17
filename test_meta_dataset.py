@@ -43,11 +43,10 @@ def get_test_loader(args):
 
 
 def main(args):
-    #args.distributed = False
     utils.init_distributed_mode(args)
 
     args.eval = True
-    args.dataset = 'full_meta_dataset'
+    args.dataset = 'meta_dataset'
 
     print(args)
     device = torch.device(args.device)
