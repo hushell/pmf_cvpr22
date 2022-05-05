@@ -7,9 +7,7 @@
 
 
 [[Project page](https://hushell.github.io/pmf/)]
-[[Arxiv]()]
-[[Paper with code]()]
-[[Won 2nd place in NeurIPS-MetaDL-2021]()]
+[[Arxiv](https://arxiv.org/abs/2204.07305)]
 
 
 If you find our project helpful, please consider cite:
@@ -26,6 +24,15 @@ If you find our project helpful, please consider cite:
                year = {2022}
 }
 ```
+
+
+## Updates
+
+***18/04/2022****
+We released a [Gradio demo on Huggingface Space](https://huggingface.co/spaces/hushell/pmf_with_gis) for few-shot learning where the support set is found by Google Image Search, making it a cheap version of CLIP-like zero-shot learning.
+
+***08/12/2021***
+[An early version of P>M>F](https://github.com/henrygouk/neurips-metadl-2021) won 2nd place in [NeurIPS-MetaDL-2021](https://metalearning.chalearn.org/metadlneurips2021) with [Henry Gouk](https://www.henrygouk.com/).
 
 
 ## Table of Content
