@@ -8,27 +8,12 @@
 
 [[Project page](https://hushell.github.io/pmf/)]
 [[Arxiv](https://arxiv.org/abs/2204.07305)]
-
-
-If you find our project helpful, please consider cite:
-```
-@inproceedings{hu2022pmf,
-               author = {Hu, Shell Xu
-                         and Li, Da
-                         and St\"uhmer, Jan
-                         and Kim, Minyoung
-                         and Hospedales, Timothy M.},
-               title = {Pushing the Limits of Simple Pipelines for Few-Shot Learning:
-                        External Data and Fine-Tuning Make a Difference},
-               booktitle = {CVPR},
-               year = {2022}
-}
-```
+[[Gradio demo](https://huggingface.co/spaces/hushell/pmf_with_gis)]
 
 
 ## Updates
 
-***18/04/2022****
+***18/04/2022***
 We released a [Gradio demo on Huggingface Space](https://huggingface.co/spaces/hushell/pmf_with_gis) for few-shot learning where the support set is found by Google Image Search, making it a cheap version of CLIP-like zero-shot learning.
 
 ***08/12/2021***
@@ -136,3 +121,21 @@ python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --output
 ### Test-time fine-tuning on Meta-Dataset
 
 ### Cross-domain few-shot learning
+
+
+
+If you find our project helpful, please consider cite:
+```
+@inproceedings{hu2022pmf,
+               author = {Hu, Shell Xu
+                         and Li, Da
+                         and St\"uhmer, Jan
+                         and Kim, Minyoung
+                         and Hospedales, Timothy M.},
+               title = {Pushing the Limits of Simple Pipelines for Few-Shot Learning:
+                        External Data and Fine-Tuning Make a Difference},
+               booktitle = {CVPR},
+               year = {2022}
+}
+```
+
