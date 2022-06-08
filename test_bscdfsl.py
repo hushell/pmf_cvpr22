@@ -16,19 +16,11 @@ from datasets import get_bscd_loader
 
 
 def main(args):
-    args.distributed = False
+    args.distributed = False # CDFSL dataloader doesn't support DDP
     args.eval = True
-    #utils.init_distributed_mode(args)
 
     print(args)
     device = torch.device(args.device)
-
-    ## fix the seed for reproducibility
-    #seed = args.seed + utils.get_rank()
-    #args.seed = seed
-    #torch.manual_seed(seed)
-    #np.random.seed(seed)
-    #random.seed(seed)
 
     cudnn.benchmark = True
 
@@ -51,24 +43,62 @@ def main(args):
     # Test
     criterion = torch.nn.CrossEntropyLoss()
     #datasets = ["EuroSAT", "ISIC", "CropDisease", "ChestX"]
+    datasets = args.cdfsl_domains
+    var_accs = {}
 
-    print(f'Testing {args.bscd_dataset} starts')
+    for domain in datasets:
+        print(f'\n# Testing {domain} starts...\n')
 
-    data_loader_val = get_bscd_loader(args.bscd_dataset, args.test_n_way, args.n_shot, args.image_size)
+        data_loader_val = get_bscd_loader(domain, args.test_n_way, args.n_shot, args.image_size)
 
-    test_stats = evaluate(data_loader_val, model, criterion, device)
+        # validate lr
+        best_lr = args.ada_lr
+        if args.deploy == 'finetune':
+            print("Start selecting the best lr...")
+            best_acc = 0
+            for lr in [0, 0.0001, 0.001, 0.01]:
+                model.lr = lr
+                test_stats = evaluate(data_loader_val, model, criterion, device, seed=1234, ep=5)
+                acc = test_stats['acc1']
+                print(f"*lr = {lr}: acc1 = {acc}")
+                if acc > best_acc:
+                    best_acc = acc
+                    best_lr = lr
+            model.lr = best_lr
+            print(f"### Selected lr = {best_lr}")
 
-    if args.output_dir:
-        test_stats['domain'] = args.bscd_dataset
-        test_stats['ada_lr'] = args.ada_lr
-        test_stats['ada_steps'] = args.ada_steps
-        with (output_dir / f"log_test_{args.deploy}_{args.train_tag}.txt").open("a") as f:
-            f.write(json.dumps(test_stats) + "\n")
+        # final classification
+        data_loader_val.generator.manual_seed(args.seed + 10000)
+        test_stats = evaluate(data_loader_val, model, criterion, device)
+        var_accs[domain] = (test_stats['acc1'], test_stats['acc_std'], best_lr)
 
-    acc, std = test_stats['acc1'], test_stats['acc_std']
-    conf = (1.96 * std) / np.sqrt(len(data_loader_val.dataset))
-    print(f"{args.bscd_dataset}: acc1 on {len(data_loader_val.dataset)} test images: {acc:0.2f} +- {conf:0.2f}")
+        print(f"{domain}: acc1 on {len(data_loader_val.dataset)} test images: {test_stats['acc1']:.1f}%")
 
+        if args.output_dir and utils.is_main_process():
+            test_stats['domain'] = domain
+            test_stats['lr'] = best_lr
+            with (output_dir / f"log_test_{args.deploy}_{args.train_tag}.txt").open("a") as f:
+                f.write(json.dumps(test_stats) + "\n")
+
+    # print results as a table
+    if utils.is_main_process():
+        rows = []
+        for dataset_name in datasets:
+            row = [dataset_name]
+            acc, std, lr = var_accs[dataset_name]
+            conf = (1.96 * std) / np.sqrt(len(data_loader_val.dataset))
+            row.append(f"{acc:0.2f} +- {conf:0.2f}")
+            row.append(f"{lr}")
+            rows.append(row)
+        np.save(os.path.join(output_dir, f'test_results_{args.deploy}_{args.train_tag}.npy'), {'rows': rows})
+
+        table = tabulate(rows, headers=['Domain', args.arch, 'lr'], floatfmt=".2f")
+        print(table)
+        print("\n")
+
+        if args.output_dir:
+            with (output_dir / f"log_test_{args.deploy}_{args.train_tag}.txt").open("a") as f:
+                f.write(table)
 
 if __name__ == '__main__':
     parser = get_args_parser()

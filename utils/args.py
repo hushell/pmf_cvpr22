@@ -48,7 +48,7 @@ def get_args_parser():
     parser.add_argument('--val_sources', nargs="+", default=['aircraft', 'cu_birds', 'dtd', 'fungi', 'ilsvrc_2012', 'omniglot', 'quickdraw', 'vgg_flower'],
                         help='List of datasets to use for validation')
     parser.add_argument('--test_sources', nargs="+", default=['traffic_sign', 'mscoco', 'ilsvrc_2012', 'omniglot', 'aircraft', 'cu_birds', 'dtd', 'quickdraw', 'fungi', 'vgg_flower'],
-                        help='List of datasets to use for testing')
+                        help='List of datasets to use for meta-testing')
     parser.add_argument('--shuffle', type=bool, default=True,
                         help='Whether or not to shuffle data for TFRecordDataset')
     parser.add_argument('--train_transforms', nargs="+", default=['random_resized_crop', 'jitter', 'random_flip', 'to_tensor', 'normalize'],
@@ -88,11 +88,10 @@ def get_args_parser():
                               ignore the hierarchy for this proportion of episodes \
                               and instead sample categories uniformly.')
 
-    # BCDFSL parameters
+    # CDFSL parameters
     parser.add_argument('--test_n_way'  , default=5, type=int,  help='class num to classify for testing (validation) ')
     parser.add_argument('--n_shot'      , default=5, type=int,  help='number of labeled data in each class, same as n_support')
-    parser.add_argument('--bscd-dataset', default='EuroSAT', choices=['EuroSAT', 'ISIC', 'CropDisease', 'ChestX'],
-                        type=str, help='Broader cross-domain datasets')
+    parser.add_argument('--cdfsl_domains', nargs="+", default=['EuroSAT', 'ISIC', 'CropDisease', 'ChestX'], help='CDFSL datasets')
 
     # Model params
     parser.add_argument('--arch', default='dino_base_patch16_224', type=str,

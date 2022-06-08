@@ -93,7 +93,7 @@ ulimit -n 100000 # may need to check `ulimit -Hn` first to know the hard limit
 ```
 For various-way-various-shot training (#ways = 5-50, max #query = 10, max #supp = 500, max #supp per class = 100), the following command yields a P(DINO ViT-small) -> M(ProtoNet) updated backbone:
 ```
-python main.py --output outputs/your_experiment_name --dataset meta_dataset --data-path /path/to/h5/files/ --num_workers 4 --base_sources aircraft cu_birds dtd ilsvrc_2012 omniglot fungi vgg_flower quickdraw --epochs 100 --lr 5e-4 --arch dino_small_patch16 --dist-eval --device cuda:0 --fp16
+python main.py --output outputs/your_experiment_name --dataset meta_dataset --data-path /path/to/meta-dataset/ --num_workers 4 --base_sources aircraft cu_birds dtd ilsvrc_2012 omniglot fungi vgg_flower quickdraw --epochs 100 --lr 5e-4 --arch dino_small_patch16 --dist-eval --device cuda:0 --fp16
 ```
 The minimum GPU memory is 24GB. The logging file `outputs/your_experiment_name/log.txt` can be used to monitor model performance.
 
@@ -113,16 +113,28 @@ python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --output
 
 ## Meta-Testing
 
-### By default 
-Take the same command for training, which can be found in `outputs/your_experiment_name/log.txt` (search `main.py`),
+### For datasets without domain shifts
+Copy the same command for training, which can be found in `outputs/your_experiment_name/log.txt` (search `main.py`),
 and add `--eval`
 
-### On Meta-Dataset without fine-tuning
+### Fine-tuning on meta-test tasks
+When domain shift exists between meta-training and meta-testing, we enable different model deployments: vanilla (ProtoNet classification) and fine-tuning (the backbone will be updated on support set).
+For the latter, a few hyper-parameters are introduced: `args.ada_steps`, `args.ada_lr`, `aug_prob`, `aug_types`, among which `args.ada_lr` is the more sensitive one and requires validation.
 
-### fine-tuning on Meta-Dataset
+An example of meta-testing command for Meta-Dataset with fine-tuning is
+```
+python test_meta_dataset.py --data-path /path/to/meta_dataset/ --dataset meta_dataset --device cuda:0 --arch dino_small_patch16 --deploy finetune --output outputs/your_experiment_name --resume outputs/your_experiment_name/best.pth 
+```
+To meta-test without fine-tuning, just replace `--deploy finetune` with `--deploy vanilla`.
+
+A DDP version of the above command is just replacing `--device cuda:0` with `--dist-eval`. By default, all 10 domains will be evaluated, but you may meta-test only a subset by specifying which domains should be executed with `--test_sources`. Check (utils/args.py)[utils/args.py] for domain names.
 
 ### Cross-domain few-shot learning
-
+Meta-testing CDFSL is almost the same as that of Meta-Dataset. However, we create another script to fit CDFSL's original data loaders. 
+And example of meta-testing command for CDFSL with fine-tuning is
+```
+python test_meta_dataset.py --test_n_way 5 --n_shot 5 --device cuda:0 --arch dino_small_patch16 --deploy finetune --output outputs/your_experiment_name --resume outputs/your_experiment_name/best.pth 
+```
 
 
 If you find our project helpful, please consider cite our paper:
