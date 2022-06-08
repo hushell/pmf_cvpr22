@@ -5,11 +5,24 @@
 
 *[Shell Xu Hu](https://hushell.github.io/), [Da Li](https://dali-dl.github.io/), [Jan Stühmer](https://scholar.google.com/citations?user=pGukv5YAAAAJ&hl=en), [Minyoung Kim](https://sites.google.com/site/mikim21/) and [Timothy Hospedales](https://homepages.inf.ed.ac.uk/thospeda/)*
 
-
 [[Project page](https://hushell.github.io/pmf/)]
 [[Arxiv](https://arxiv.org/abs/2204.07305)]
 [[Gradio demo](https://huggingface.co/spaces/hushell/pmf_with_gis)]
 
+If you find our project helpful, please consider cite our paper:
+```
+@inproceedings{hu2022pmf,
+               author = {Hu, Shell Xu
+                         and Li, Da
+                         and St\"uhmer, Jan
+                         and Kim, Minyoung
+                         and Hospedales, Timothy M.},
+               title = {Pushing the Limits of Simple Pipelines for Few-Shot Learning:
+                        External Data and Fine-Tuning Make a Difference},
+               booktitle = {CVPR},
+               year = {2022}
+}
+```
 
 ## Updates
 
@@ -43,8 +56,9 @@ pip install -r requirements.txt
 ```
 
 ## Datasets
-We provide dataset classes and DDP dataloaders for CIFAR-FS, Mini-ImageNet and Meta-Dataset. 
-For more details, check [datasets/__init__.py:get_sets()](datasets/__init__.py#L15) and [datasets/__init__.py:get_loaders()](datasets/__init__.py#L70).
+We provide dataset classes and DDP dataloaders for CIFAR-FS, Mini-ImageNet and Meta-Dataset,
+and also adapted the [CDFSL datasets](https://arxiv.org/abs/1912.07200v3) to our pipeline.
+For more details, check [datasets/__init__.py:get_sets()](datasets/__init__.py#L15), [datasets/__init__.py:get_loaders()](datasets/__init__.py#L70) and [datasets/__init__.py:get_bscd_loader()](datasets/__init__.py#L158).
 
 ### CIFAR-FS and Mini-ImageNet
 ```
@@ -71,7 +85,7 @@ You will need to specify the path to your `tfrecords` files in the above python 
 
 ### CDFSL
 The purpose of this benchmark is to evaluate model trained on Mini-ImageNet (source domain) by cross-domain meta-test tasks. 
-So we only need to download the (target datasets (domains))[https://github.com/IBM/cdfsl-benchmark#target-domains], and extract the files into `./data/`.
+So we only need to download the [target datasets (domains)](https://github.com/yunhuiguo/CVPR-2021-L2ID-Classification-Challenges#target-domains), and extract the files into `./data/`.
 You'll need to have these 4 sub-folders: 
 ```
 ./data/ChestX
@@ -83,7 +97,7 @@ You'll need to have these 4 sub-folders:
 ## Pre-training
 We support multiple pretrained foundation models. E.g., 
 `DINO ViT-base`, `DINO ViT-small`, `DINO ResNet50`, `BeiT ViT-base`, `CLIP ViT-base`, `CLIP ResNet50` and so on.
-For options of `args.arch`, please check (models/__init__.py::get_backbone())[models/__init__.py#L9].
+For options of `args.arch`, please check [models/__init__.py::get_backbone()](models/__init__.py#L9).
 
 
 ## Meta-Training
@@ -137,7 +151,7 @@ python test_meta_dataset.py --data-path /path/to/meta_dataset/ --dataset meta_da
 ```
 To meta-test without fine-tuning, just replace `--deploy finetune` with `--deploy vanilla`.
 
-A DDP version of the above command is just replacing `--device cuda:0` with `--dist-eval`. By default, all 10 domains will be evaluated, but you may meta-test only a subset by specifying which domains should be executed with `--test_sources`. Check (utils/args.py)[utils/args.py] for domain names.
+A DDP version of the above command is just replacing `--device cuda:0` with `--dist-eval`. By default, all 10 domains will be evaluated, but you may meta-test only a subset by specifying which domains should be executed with `--test_sources`. Check [utils/args.py](utils/args.py) for domain names.
 
 ### Cross-domain few-shot learning
 Meta-testing CDFSL is almost the same as that of Meta-Dataset. However, we create another script to fit CDFSL's original data loaders. 
@@ -147,18 +161,4 @@ python test_meta_dataset.py --test_n_way 5 --n_shot 5 --device cuda:0 --arch din
 ```
 
 
-If you find our project helpful, please consider cite our paper:
-```
-@inproceedings{hu2022pmf,
-               author = {Hu, Shell Xu
-                         and Li, Da
-                         and St\"uhmer, Jan
-                         and Kim, Minyoung
-                         and Hospedales, Timothy M.},
-               title = {Pushing the Limits of Simple Pipelines for Few-Shot Learning:
-                        External Data and Fine-Tuning Make a Difference},
-               booktitle = {CVPR},
-               year = {2022}
-}
-```
 
