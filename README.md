@@ -28,12 +28,12 @@ We released a [Gradio demo on Huggingface Space](https://huggingface.co/spaces/h
     * [CDFSL](#cdfsl)
 * [Pre-training](#pre-training)
 * [Meta-training](#meta-training)
-    * [ProtoNet on CIFAR-FS and Mini-ImageNet](#protonet-on-cifar-fs-and-mini-imagenet)
-    * [ProtoNet on Meta-Dataset](#protonet-on-meta-dataset)
-    * [ProtoNet on Meta-Dataset with ImageNet only](#protonet-on-meta-dataset-with-imagenet-only)
+    * [On CIFAR-FS and Mini-ImageNet](#on-cifar-fs-and-mini-imagenet)
+    * [On Meta-Dataset with 8 source domains](#on-meta-dataset-with-8-source-domains)
+    * [On Meta-Dataset with ImageNet only](#on-meta-dataset-with-imagenet-only)
 * [Meta-testing](#meta-testing)
-    * [Vanilla](#vanilla)
-    * [Test-time fine-tuning on Meta-Dataset](#test-time-fine-tuning-on-meta-dataset)
+    * [For datasets without domain shift](#for-datasets-without-domain-shift)
+    * [Fine-tuning on meta-test tasks](#fine-tuning-on-meta-test-tasks)
     * [Cross-domain few-shot learning](#cross-domain-few-shot-learning)
 
 
@@ -69,6 +69,16 @@ We will soon provide a link for downloading the `h5` files. You may generate the
 3. Generate 600 validation tasks on a set of reserved classes using [scripts/generate_val_episodes_to_h5.py](scripts/generate_val_episodes_to_h5.py) into a single `h5` file. This is to remove randomness in validation.
 You will need to specify the path to your `tfrecords` files in the above python scripts.
 
+### CDFSL
+The purpose of this benchmark is to evaluate model trained on Mini-ImageNet (source domain) by cross-domain meta-test tasks. 
+So we only need to download the (target datasets (domains))[https://github.com/IBM/cdfsl-benchmark#target-domains], and extract the files into `./data/`.
+You'll need to have these 4 sub-folders: 
+```
+./data/ChestX
+./data/CropDiseases
+./data/EuroSAT/2750
+./data/ISIC
+```
 
 ## Pre-training
 We support multiple pretrained foundation models. E.g., 
@@ -86,7 +96,7 @@ python main.py --output outputs/your_experiment_name --dataset cifar_fs --epoch 
 ```
 Because at least one episode has to be hosted on the GPU, the program is quite memory hungry. Mixed precision (`--fp16`) is recommended.
 
-### On Meta-Dataset (8 base domains)
+### On Meta-Dataset with 8 source domains
 Since each class is stored in a h5 file, training will open many files. The following command is required before launching the code:
 ```
 ulimit -n 100000 # may need to check `ulimit -Hn` first to know the hard limit
@@ -97,10 +107,10 @@ python main.py --output outputs/your_experiment_name --dataset meta_dataset --da
 ```
 The minimum GPU memory is 24GB. The logging file `outputs/your_experiment_name/log.txt` can be used to monitor model performance.
 
-### On Meta-Dataset (ImageNet only)
+### On Meta-Dataset with ImageNet only
 Just replace `--base_sources ...` by `--base_sources ilsvrc_2012`.
 
-### Multi-GPU DDP on a single machine
+### Distributed data parallel on a single machine
 First, setting up the following environmental variables: 
 ```
 export RANK=0 # machine id
@@ -113,7 +123,7 @@ python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --output
 
 ## Meta-Testing
 
-### For datasets without domain shifts
+### For datasets without domain shift
 Copy the same command for training, which can be found in `outputs/your_experiment_name/log.txt` (search `main.py`),
 and add `--eval`
 
