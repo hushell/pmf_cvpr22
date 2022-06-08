@@ -54,6 +54,8 @@ We released a [Gradio demo on Huggingface Space](https://huggingface.co/spaces/h
 ```
 pip install -r requirements.txt
 ```
+The code was tested with Python 3.8.1 and Pytorch >= 1.7.0.
+
 
 ## Datasets
 We provide dataset classes and DDP dataloaders for CIFAR-FS, Mini-ImageNet and Meta-Dataset,
@@ -119,7 +121,7 @@ For various-way-various-shot training (#ways = 5-50, max #query = 10, max #supp 
 ```
 python main.py --output outputs/your_experiment_name --dataset meta_dataset --data-path /path/to/meta-dataset/ --num_workers 4 --base_sources aircraft cu_birds dtd ilsvrc_2012 omniglot fungi vgg_flower quickdraw --epochs 100 --lr 5e-4 --arch dino_small_patch16 --dist-eval --device cuda:0 --fp16
 ```
-The minimum GPU memory is 24GB. The logging file `outputs/your_experiment_name/log.txt` can be used to monitor model performance.
+The minimum GPU memory is 24GB. The logging file `outputs/your_experiment_name/log.txt` can be used to monitor model performance (as you can check it remotely).
 
 ### On Meta-Dataset with ImageNet only
 Just replace `--base_sources ...` by `--base_sources ilsvrc_2012`.
@@ -151,14 +153,11 @@ python test_meta_dataset.py --data-path /path/to/meta_dataset/ --dataset meta_da
 ```
 To meta-test without fine-tuning, just replace `--deploy finetune` with `--deploy vanilla`.
 
-A DDP version of the above command is just replacing `--device cuda:0` with `--dist-eval`. By default, all 10 domains will be evaluated, but you may meta-test only a subset by specifying which domains should be executed with `--test_sources`. Check [utils/args.py](utils/args.py) for domain names.
+A DDP version of the above command is also available: just replacing `--device cuda:0` with `--dist-eval`. By default, all 10 domains will be evaluated, but you may meta-test only a subset by specifying which domains should be executed with `--test_sources`. Check [utils/args.py](utils/args.py) for domain names.
 
 ### Cross-domain few-shot learning
 Meta-testing CDFSL is almost the same as that of Meta-Dataset. However, we create another script to fit CDFSL's original data loaders. 
-And example of meta-testing command for CDFSL with fine-tuning is
+An example of meta-testing command for CDFSL with fine-tuning is
 ```
 python test_meta_dataset.py --test_n_way 5 --n_shot 5 --device cuda:0 --arch dino_small_patch16 --deploy finetune --output outputs/your_experiment_name --resume outputs/your_experiment_name/best.pth 
 ```
-
-
-
