@@ -9,6 +9,17 @@
 [[Arxiv](https://arxiv.org/abs/2204.07305)]
 [[Gradio demo](https://huggingface.co/spaces/hushell/pmf_with_gis)]
 
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/pushing-the-limits-of-simple-pipelines-for/few-shot-image-classification-on-meta-dataset)](https://paperswithcode.com/sota/few-shot-image-classification-on-meta-dataset?p=pushing-the-limits-of-simple-pipelines-for)
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/pushing-the-limits-of-simple-pipelines-for/few-shot-image-classification-on-mini-2)](https://paperswithcode.com/sota/few-shot-image-classification-on-mini-2?p=pushing-the-limits-of-simple-pipelines-for)
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/pushing-the-limits-of-simple-pipelines-for/few-shot-image-classification-on-mini-3)](https://paperswithcode.com/sota/few-shot-image-classification-on-mini-3?p=pushing-the-limits-of-simple-pipelines-for)
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/pushing-the-limits-of-simple-pipelines-for/few-shot-image-classification-on-cifar-fs-5-1)](https://paperswithcode.com/sota/few-shot-image-classification-on-cifar-fs-5-1?p=pushing-the-limits-of-simple-pipelines-for)
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/pushing-the-limits-of-simple-pipelines-for/few-shot-image-classification-on-cifar-fs-5)](https://paperswithcode.com/sota/few-shot-image-classification-on-cifar-fs-5?p=pushing-the-limits-of-simple-pipelines-for)
+
 If you find our project helpful, please consider cite our paper:
 ```
 @inproceedings{hu2022pmf,
@@ -145,7 +156,7 @@ and add `--eval`
 
 ### Fine-tuning on meta-test tasks
 When domain shift exists between meta-training and meta-testing, we enable different model deployments: vanilla (ProtoNet classification) and fine-tuning (the backbone will be updated on support set).
-For the latter, a few hyper-parameters are introduced: `args.ada_steps`, `args.ada_lr`, `aug_prob`, `aug_types`, among which `args.ada_lr` is the more sensitive one and requires validation.
+For the latter, a few hyper-parameters are introduced: `args.ada_steps`, `args.ada_lr`, `args.aug_prob`, `args.aug_types`, among which `args.ada_lr` is the more sensitive one and requires validation.
 
 An example of meta-testing command for Meta-Dataset with fine-tuning is
 ```
