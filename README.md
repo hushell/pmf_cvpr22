@@ -12,13 +12,6 @@
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/pushing-the-limits-of-simple-pipelines-for/few-shot-image-classification-on-meta-dataset)](https://paperswithcode.com/sota/few-shot-image-classification-on-meta-dataset?p=pushing-the-limits-of-simple-pipelines-for)
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/pushing-the-limits-of-simple-pipelines-for/few-shot-image-classification-on-mini-2)](https://paperswithcode.com/sota/few-shot-image-classification-on-mini-2?p=pushing-the-limits-of-simple-pipelines-for)
-
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/pushing-the-limits-of-simple-pipelines-for/few-shot-image-classification-on-mini-3)](https://paperswithcode.com/sota/few-shot-image-classification-on-mini-3?p=pushing-the-limits-of-simple-pipelines-for)
-
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/pushing-the-limits-of-simple-pipelines-for/few-shot-image-classification-on-cifar-fs-5-1)](https://paperswithcode.com/sota/few-shot-image-classification-on-cifar-fs-5-1?p=pushing-the-limits-of-simple-pipelines-for)
-
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/pushing-the-limits-of-simple-pipelines-for/few-shot-image-classification-on-cifar-fs-5)](https://paperswithcode.com/sota/few-shot-image-classification-on-cifar-fs-5?p=pushing-the-limits-of-simple-pipelines-for)
 
 If you find our project helpful, please consider cite our paper:
 ```
@@ -92,8 +85,16 @@ To train and test on this dataset, set `args.dataset = meta_dataset` and `args.d
 
 We will soon provide a link for downloading the `h5` files. You may generate them by yourself following these steps:
 1. Download 10 datasets (one for each domain) listed in [Downloading and converting datasets](https://github.com/google-research/meta-dataset#downloading-and-converting-datasets), which will create `tfrecords` files for each class and `dataset_spec.json` for each domain.
-2. Convert `tfrecords` to `h5` using [scripts/convert_tfrecord_to_h5.py](scripts/convert_tfrecord_to_h5.py).
-3. Generate 600 validation tasks on a set of reserved classes using [scripts/generate_val_episodes_to_h5.py](scripts/generate_val_episodes_to_h5.py) into a single `h5` file. This is to remove randomness in validation.
+2. Generate the index files of tfrecords with existing tool:
+```
+export RECORDS='path/to/tfrecords'
+for source in omniglot aircraft cu_birds dtd quickdraw vgg_flower traffic_sign mscoco ilsvrc_2012_v2; do \
+		source_path=${RECORDS}/$${source} ;\
+		find $${source_path} -name '*.tfrecords' -type f -exec sh -c 'python3 datasets/meta_dataset/tfrecord/tools/tfrecord2idx.py $$2 $${2%.tfrecords}.index' sh $${source_path} {} \; ;\
+	done ;\
+```
+3. Convert `tfrecords` to `h5` using [scripts/convert_tfrecord_to_h5.py](scripts/convert_tfrecord_to_h5.py).
+4. Generate 600 validation tasks on a set of reserved classes using [scripts/generate_val_episodes_to_h5.py](scripts/generate_val_episodes_to_h5.py) into a single `h5` file. This is to remove randomness in validation.
 You will need to specify the path to your `tfrecords` files in the above python scripts.
 
 ### CDFSL
