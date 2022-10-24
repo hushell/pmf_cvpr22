@@ -22,9 +22,7 @@ def get_args_parser():
                         help='dataset path')
     parser.add_argument('--pretrained-checkpoint-path', default='.', type=str,
                         help='path which contains the directories pretrained_ckpts and pretrained_ckpts_converted')
-    parser.add_argument("--dataset", choices=["cifar_fs_elite", "cifar_fs", "mini_imagenet",
-                                              "meta_dataset", "meta_dataset_h5", "imagenet_h5",
-                                              "full_meta_dataset", "imagewise_meta_dataset"],
+    parser.add_argument("--dataset", choices=["cifar_fs_elite", "cifar_fs", "mini_imagenet", "meta_dataset"],
                         default="cifar_fs",
                         help="Which few-shot dataset.")
 

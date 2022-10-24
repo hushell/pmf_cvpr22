@@ -11,7 +11,7 @@ from pathlib import Path
 import utils.deit_util as utils
 from utils.args import get_args_parser
 
-from datasets import get_metadataset
+from datasets.meta_dataset import get_metadataset
 from datasets.meta_dataset.utils import Split
 
 
