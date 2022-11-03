@@ -178,7 +178,7 @@ First, setting up the following environmental variables:
 export RANK=0 # machine id
 export WORLD_SIZE=1 # total number of machines
 ```
-For example, if you got 8 GPUs, run this command will accumulate gradients from 8 episodes:
+For example, if you got 8 GPUs, run this command will accumulate gradients from 8 parallel episodes:
 ```
 python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --output outputs/your_experiment_name --dataset meta_dataset --data-path /path/to/h5/files/ --num_workers 4 --base_sources aircraft cu_birds dtd ilsvrc_2012 omniglot fungi vgg_flower quickdraw --epochs 100 --lr 5e-4 --arch dino_small_patch16 --dist-eval --fp16
 ```
@@ -186,24 +186,28 @@ python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --output
 ## Meta-Testing
 
 ### For datasets without domain shift
-Copy the same command for training, which can be found in `outputs/your_experiment_name/log.txt` (search `main.py`),
-and add `--eval`
+Copy the same command for training, which can be found in `outputs/your_experiment_name/log.txt` (should be the first line or search keyword main.py),
+and add `--eval`.
 
 ### Fine-tuning on meta-test tasks
-When domain shift exists between meta-training and meta-testing, we enable different model deployments: vanilla (ProtoNet classification) and fine-tuning (the backbone will be updated on support set).
-For the latter, a few hyper-parameters are introduced: `args.ada_steps`, `args.ada_lr`, `args.aug_prob`, `args.aug_types`, among which `args.ada_lr` is the more sensitive one and requires validation.
+When domain shift exists between meta-training and meta-testing, we enable different model deployment modes: `vanilla` (ProtoNet classification) and `finetune` (the backbone will be updated on support set). Check [get_model()](models/__init__.py:175) for the actual implementation.
 
-An example of meta-testing command for Meta-Dataset with fine-tuning is
-```
-python test_meta_dataset.py --data-path /path/to/meta_dataset/ --dataset meta_dataset --device cuda:0 --arch dino_small_patch16 --deploy finetune --output outputs/your_experiment_name --resume outputs/your_experiment_name/best.pth 
-```
+For `finetune`, a few hyper-parameters are introduced: `args.ada_steps`, `args.ada_lr`, `args.aug_prob`, `args.aug_types`, among which `args.ada_lr` is the more sensitive one and requires validation (e.g., `--ada_lr 0.001`). We also recommend to play with `args.ada_steps` (e.g., `--ada_steps 50`). The good news is that empirically we find good performance can be achieved by domain-wise hyper-parameter search. As recommended in our paper, 3-5 episodes with labeled query set is sufficient to tell what the best hyper-parameters are, which makes model deployment practical for a novel domain with a few annotated examples. 
+
+A meta-testing command example for Meta-Dataset with fine-tuning is 
+``` 
+python -m torch.distributed.launch --nproc_per_node=8 --use_env test_meta_dataset.py --data-path /path/to/meta_dataset/ --dataset meta_dataset --arch dino_small_patch16 --deploy finetune --output outputs/your_experiment_name --resume outputs/your_experiment_name/best.pth --dist-eval --ada_steps 100 --ada_lr 0.0001 --aug_prob 0.9 --aug_types color transition
+``` 
+
 To meta-test without fine-tuning, just replace `--deploy finetune` with `--deploy vanilla`.
 
-A DDP version of the above command is also available: just replacing `--device cuda:0` with `--dist-eval`. By default, all 10 domains will be evaluated, but you may meta-test only a subset by specifying which domains should be executed with `--test_sources`. Check [utils/args.py](utils/args.py) for domain names.
+If you don't want to enable DDP for testing, just replacing `--dist-eval` by `--device cuda:0` and remove `torch.distributed.launch` part. 
+By default, all 10 domains will be evaluated, but you may meta-test only a subset by specifying which domains should be executed with `--test_sources`. Check [utils/args.py:48](utils/args.py) for domain names.
 
 ### Cross-domain few-shot learning
-Meta-testing CDFSL is almost the same as that of Meta-Dataset. However, we create another script to fit CDFSL's original data loaders. 
-An example of meta-testing command for CDFSL with fine-tuning is
+Meta-testing CDFSL is almost the same as described in previous section for Meta-Dataset. However, we create another script [test_bscdfsl.py](test_bscdfsl.py) to fit CDFSL's original data loaders. 
+An meta-testing command example for CDFSL with fine-tuning is
 ```
-python test_meta_dataset.py --test_n_way 5 --n_shot 5 --device cuda:0 --arch dino_small_patch16 --deploy finetune --output outputs/your_experiment_name --resume outputs/your_experiment_name/best.pth 
+python test_bscdfsl.py --test_n_way 5 --n_shot 5 --device cuda:0 --arch dino_small_patch16 --deploy finetune --output outputs/your_experiment_name --resume outputs/your_experiment_name/best.pth --ada_steps 100 --ada_lr 0.0001 --aug_prob 0.9 --aug_types color transition
 ```
+Changing `--n_shot` to 20 or 50 to evaluate other settings.

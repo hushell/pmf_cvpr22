@@ -7,6 +7,7 @@ import torch.backends.cudnn as cudnn
 import json
 
 from pathlib import Path
+from tabulate import tabulate
 
 from engine import evaluate
 import utils.deit_util as utils
@@ -56,7 +57,7 @@ def main(args):
         if args.deploy == 'finetune':
             print("Start selecting the best lr...")
             best_acc = 0
-            for lr in [0, 0.0001, 0.001, 0.01]:
+            for lr in [0, 0.0001, 0.0005, 0.001]:
                 model.lr = lr
                 test_stats = evaluate(data_loader_val, model, criterion, device, seed=1234, ep=5)
                 acc = test_stats['acc1']
