@@ -77,7 +77,7 @@ datasets/
 ├── meta_val_dataset.py        # meta-dataset class for validation with fixed val episodes
 ```
 
-We unify the data-loading interface in [datasets/__init__.py](datasets/__init__.py). So the only functions you may need to pay attention are
+We unify the dataset definition, distributed sampler and randomness control in [datasets/\__init__.py](datasets/__init__.py), but in general the only functions you may need to pay attention are
 1. [get_loaders()](datasets/__init__.py#L70). Usage: [main.py:51](https://github.com/hushell/pmf_cvpr22/blob/86fa88c9a446886d530d865a360b09a1064d928f/main.py#L51)
 2. [get_bscd_loader()](datasets/__init__.py#L158), which is for CDFSL benchmark. Usage: [test_bscdfsl.py:52](https://github.com/hushell/pmf_cvpr22/blob/86fa88c9a446886d530d865a360b09a1064d928f/test_bscdfsl.py#L52).
 
