@@ -4,12 +4,12 @@ import numpy as np
 import time
 import torch
 import h5py as h5
+import sys
 
 from tqdm import tqdm
 from pathlib import Path
 
 import utils.deit_util as utils
-from utils.args import get_args_parser
 
 from datasets.meta_dataset import reader
 #from datasets.meta_dataset.utils import parse_record
@@ -18,7 +18,6 @@ import torchvision.transforms as transforms
 from PIL import Image
 
 from datasets.meta_dataset.utils import Split
-from datasets.meta_dataset import config as config_lib
 from datasets.meta_dataset import dataset_spec as dataset_spec_lib
 
 
@@ -62,6 +61,8 @@ def convert_class_datasets(dataset_spec_list):
                     image = cv2.imdecode(image, -1)
                     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # from BGR to RGB
 
+                    # due to storage limit, we store resized images if original is larger than 224
+                    # for QuickDraw, we use 28x28 as this already yields an h5 file with 218GB
                     if (image.shape[0] >= 224 and image.shape[1] >= 224) or dataset_spec_list[i].name == 'quickdraw':
                         image = Image.fromarray(image)
                         image = resizer(image)
@@ -74,20 +75,16 @@ def convert_class_datasets(dataset_spec_list):
                     #    print(f'Ep{j}: img.shape={image.shape}')
 
 
-def main(args):
+def main(data_path='/path/to/meta-dataset/tf_records'):
     ###########################################################################
-    # EDIT here
-    #args.data_path = '/path/to/meta-dataset/tf_records'
-    args.dataset = 'meta_dataset'
-    args.num_workers = 10
-
-    datasets = ['ilsvrc_2012', 'omniglot', 'aircraft', 'cu_birds', 'dtd', 'quickdraw', 'fungi', 'vgg_flower', 'traffic_sign', 'mscoco']
-
+    # EDIT here if you don't want to convert all domains
+    domains = ['ilsvrc_2012', 'omniglot', 'aircraft', 'cu_birds', 'dtd', 'quickdraw', 'fungi', 'vgg_flower', 'traffic_sign', 'mscoco']
     ###########################################################################
+
     # Conversion
     all_dataset_specs = []
-    for dataset_name in datasets:
-        dataset_records_path = os.path.join(args.data_path, dataset_name)
+    for dname in domains:
+        dataset_records_path = os.path.join(data_path, dname)
         dataset_spec = dataset_spec_lib.load_dataset_spec(dataset_records_path)
         all_dataset_specs.append(dataset_spec)
 
@@ -95,7 +92,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = get_args_parser()
-    args = parser.parse_args()
-
-    main(args)
+    main(sys.argv[1])

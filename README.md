@@ -64,7 +64,22 @@ The code was tested with Python 3.8.1 and Pytorch >= 1.7.0.
 ## Datasets
 We provide dataset classes and DDP dataloaders for CIFAR-FS, Mini-ImageNet and Meta-Dataset,
 and also adapted the [CDFSL datasets](https://arxiv.org/abs/1912.07200v3) to our pipeline.
-For more details, check [datasets/__init__.py:get_sets()](datasets/__init__.py#L15), [datasets/__init__.py:get_loaders()](datasets/__init__.py#L70) and [datasets/__init__.py:get_bscd_loader()](datasets/__init__.py#L158).
+
+The overall structure of the `datasets` folder is the following:
+```
+datasets/
+├── cdfsl/                     # CDFSL datasets
+├── episodic_dataset.py        # CIFAR-FS & Mini-ImageNet
+├── __init__.py                # portal functions
+├── meta_dataset/              # code adapted from Google's meta-dataset and pytorch-meta-dataset
+├── meta_h5_dataset.py         # meta-dataset dataset class
+├── meta_val_dataset.py        # meta-dataset fixed val episodes
+```
+
+We try to unify the data-loading interface. So the only functions you may need to pay attention are
+1. [get_loaders()](datasets/__init__.py#L70). Usage: [main.py:51](https://github.com/hushell/pmf_cvpr22/blob/86fa88c9a446886d530d865a360b09a1064d928f/main.py#L51)
+2. [get_bscd_loader()](datasets/__init__.py#L158), which is for CDFSL benchmark. Usage: [test_bscdfsl.py:52](https://github.com/hushell/pmf_cvpr22/blob/86fa88c9a446886d530d865a360b09a1064d928f/test_bscdfsl.py#L52).
+
 
 ### CIFAR-FS and Mini-ImageNet
 ```
@@ -78,24 +93,42 @@ To use these two datasets, set `args.dataset = cifar_fs` or `args.dataset = mini
 We implement a pytorch version of [Meta-Dataset](https://github.com/google-research/meta-dataset).
 Our implementation is based on [mboudiaf's pytorch-meta-dataset](https://github.com/mboudiaf/pytorch-meta-dataset).
 The major change is we replace the `tfrecords` to `h5` files to largely reduce IO latency. 
+This also enables efficient DDP data-loading otherwise tfrecords leads to iterative dataset.
 
 The dataset has 10 domains, 4000+ classes. Episodes are formed in various-way-various-shot fashion, where an episode can have 900+ images.
-The images are stored class-wise in h5 files (converted from the origianl tfrecords).
+The images are stored class-wise in h5 files (converted from the origianl tfrecords, one for each class).
 To train and test on this dataset, set `args.dataset = meta_dataset` and `args.data_path = /path/to/meta_dataset`.
 
-We will soon provide a link for downloading the `h5` files. You may generate them by yourself following these steps:
-1. Download 10 datasets (one for each domain) listed in [Downloading and converting datasets](https://github.com/google-research/meta-dataset#downloading-and-converting-datasets), which will create `tfrecords` files for each class and `dataset_spec.json` for each domain.
+To download the h5 files, 
+```
+git clone https://huggingface.co/datasets/hushell/meta_dataset_h5
+```
+
+You can also generate h5 files by yourself following these steps:
+1. Download 10 domains (e.g., cu_birds) listed in [google-research/meta-dataset](https://github.com/google-research/meta-dataset#downloading-and-converting-datasets), which will create `tfrecords` files for each class and `dataset_spec.json` for each domain.
+Once done, you should get a folder `meta-dataset/tf_records` with 11 sub-folders of `*.tfrecords` files (including ilsvrc_2012 and ilsvrc_2012_v2).
+
 2. Generate the index files of tfrecords with existing tool:
 ```
 export RECORDS='path/to/tfrecords'
-for source in omniglot aircraft cu_birds dtd quickdraw vgg_flower traffic_sign mscoco ilsvrc_2012_v2; do \
-		source_path=${RECORDS}/$${source} ;\
-		find $${source_path} -name '*.tfrecords' -type f -exec sh -c 'python3 datasets/meta_dataset/tfrecord/tools/tfrecord2idx.py $$2 $${2%.tfrecords}.index' sh $${source_path} {} \; ;\
+for source in omniglot aircraft cu_birds dtd quickdraw vgg_flower traffic_sign mscoco ilsvrc_2012; do \
+		source_path=${RECORDS}/${source} ;\
+		find ${source_path} -name '*.tfrecords' -type f -exec sh -c 'python3 datasets/meta_dataset/tfrecord/tools/tfrecord2idx.py $2 ${2%.tfrecords}.index' sh ${source_path} {} \; ;\
 	done ;\
 ```
-3. Convert `tfrecords` to `h5` using [scripts/convert_tfrecord_to_h5.py](scripts/convert_tfrecord_to_h5.py).
-4. Generate 600 validation tasks on a set of reserved classes using [scripts/generate_val_episodes_to_h5.py](scripts/generate_val_episodes_to_h5.py) into a single `h5` file. This is to remove randomness in validation.
-You will need to specify the path to your `tfrecords` files in the above python scripts.
+This command will create for each tfrecords file an index file with the same name. E.g., `0.tfrecords -> 0.index`.
+
+3. Convert `tfrecords` to `h5` by calling 
+```
+python scripts/convert_tfrecord_to_h5.py /path/to/meta-dataset/tf_records
+```
+This command will create for each tfrecords file an h5 file with the same name. E.g., `0.tfrecords -> 0.h5`.
+
+4. Generate 120 validation tasks per domain on a set of reserved classes by calling 
+```
+python scripts/generate_val_episodes_to_h5.py --data-path /path/to/meta-dataset/tf_records
+```
+This goes into a single `h5` file for each domain. E.g., `cu_birds/val_ep120_img128.h5`. This is to remove randomness in validation.
 
 ### CDFSL
 The purpose of this benchmark is to evaluate model trained on Mini-ImageNet (source domain) by cross-domain meta-test tasks. 
@@ -107,6 +140,7 @@ You'll need to have these 4 sub-folders:
 ./data/EuroSAT/2750
 ./data/ISIC
 ```
+Check [get_bscd_loader()](datasets/__init__.py#L158) for the data loader.
 
 ## Pre-training
 We support multiple pretrained foundation models. E.g., 

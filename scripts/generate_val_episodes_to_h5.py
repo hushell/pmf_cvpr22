@@ -26,7 +26,7 @@ def main(args):
     args.max_num_query = 10
     args.num_workers = 10
 
-    if args.eval:
+    if args.eval: # fixed meta-test (NOT used)
         args.nValEpisode = 600
         args.val_sources = ['ilsvrc_2012', 'omniglot', 'aircraft', 'cu_birds', 'dtd', 'quickdraw', 'fungi', 'vgg_flower', 'traffic_sign', 'mscoco']
     else:
