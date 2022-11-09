@@ -30,6 +30,8 @@ If you find our project helpful, please consider cite our paper:
 ```
 
 ## Updates
+***08/11/2022***
+We released the [checkpoints](https://huggingface.co/hushell/pmf_metadataset_dino) meta-trained on Meta-Dataset with pre-trained DINO.
 
 ***18/04/2022***
 We released a [Gradio demo on Huggingface Space](https://huggingface.co/spaces/hushell/pmf_with_gis) for few-shot learning where the support set is created by text-to-image retrieval, making it a cheap version of CLIP-like zero-shot learning.
@@ -39,6 +41,7 @@ We released a [Gradio demo on Huggingface Space](https://huggingface.co/spaces/h
 
 
 ## Table of Content
+* [Pre-trained model checkpoints](#pre-trained-model-checkpoints)
 * [Prerequisites](#prerequisites)
 * [Datasets](#datasets)
     * [CIFAR-FS and Mini-ImageNet](#cifar-fs-and-mini-imagenet)
@@ -53,6 +56,10 @@ We released a [Gradio demo on Huggingface Space](https://huggingface.co/spaces/h
     * [For datasets without domain shift](#for-datasets-without-domain-shift)
     * [Fine-tuning on meta-test tasks](#fine-tuning-on-meta-test-tasks)
     * [Cross-domain few-shot learning](#cross-domain-few-shot-learning)
+
+
+## Pre-trained model checkpoints
+We release three [checkpoints](https://huggingface.co/hushell/pmf_metadataset_dino) meta-trained on Meta-Dataset with pre-trained DINO for reproducibility.
 
 
 ## Prerequisites
@@ -100,7 +107,7 @@ The dataset has 10 domains, 4000+ classes. Episodes are formed in various-way-va
 The images are stored class-wise in h5 files (converted from the origianl tfrecords, one for each class).
 To train and test on this dataset, set `--dataset meta_dataset` and `--data_path /path/to/meta_dataset`.
 
-To download the h5 files, 
+To download the h5 files (except for ILSVRC 2012), 
 ```
 git clone https://huggingface.co/datasets/hushell/meta_dataset_h5
 ```
@@ -204,6 +211,14 @@ To meta-test without fine-tuning, just replace `--deploy finetune` with `--deplo
 
 If you don't want to enable DDP for testing, just replacing `--dist-eval` by `--device cuda:0` and remove `torch.distributed.launch` part. 
 By default, all 10 domains will be evaluated, but you may meta-test only a subset by specifying which domains should be executed with `--test_sources`. Check [utils/args.py:48](utils/args.py) for domain names.
+
+Below are the results on Meta-Dataset test-set for DINO checkpoints:
+
+Method                     |ILSVRC (test)              |Omniglot                   |Aircraft                   |Birds                      |Textures                   |QuickDraw                  |Fungi                      |VGG Flower                 |Traffic signs              |MSCOCO
+---------------------------|---------------------------|---------------------------|---------------------------|---------------------------|---------------------------|---------------------------|---------------------------|---------------------------|---------------------------|---------------------------
+[md_full_128x128_dinosmall_fp16_lr5e-5](https://huggingface.co/hushell/pmf_metadataset_dino/blob/main/md_full_128x128_dinosmall_fp16_lr5e-5/best.pth)             |73.52±0.80&nbsp;(lr=0.0001)       |92.17±0.57&nbsp;(lr=0.0001)     |89.49±0.52&nbsp;(lr=0.001)        |91.04±0.37&nbsp;(lr=0.0001)       |85.73±0.62&nbsp;(lr=0.001)      |79.43±0.67&nbsp;(lr=0.0001)     |74.99±0.94&nbsp;(lr=0)       |95.30±0.44&nbsp;(lr=0.001)        |89.85±0.76&nbsp;(lr=0.01)        |59.69±1.02&nbsp;(lr=0.001)
+[md_inet_128x128_dinosmall_fp16_lr2e-4](https://huggingface.co/hushell/pmf_metadataset_dino/blob/main/md_imagenet_128x128_dinosmall_fp16_lr2e-4/best.pth)          |75.51±0.72&nbsp;(lr=0.001)       |82.81±1.10&nbsp;(lr=0.01)       |78.38±1.09&nbsp;(lr=0.01)       |85.18±0.77&nbsp;(lr=0.001)     |86.95±0.60&nbsp;(lr=0.001)       |74.47±0.83&nbsp;(lr=0.01)     |55.16±1.09&nbsp;(lr=0)       |94.66±0.48&nbsp;(lr=0)       |90.04±0.81&nbsp;(lr=0.01)       |62.60±0.96&nbsp;(lr=0.001)
+
 
 ### Cross-domain few-shot learning
 Meta-testing CDFSL is almost the same as described in previous section for Meta-Dataset. However, we create another script [test_bscdfsl.py](test_bscdfsl.py) to fit CDFSL's original data loaders. 
