@@ -110,8 +110,6 @@ To train and test on this dataset, set `--dataset meta_dataset` and `--data_path
 To download the h5 files (except for ILSVRC 2012), 
 ```
 git clone https://huggingface.co/datasets/hushell/meta_dataset_h5
-git checkout main/master
-git checkout -b master
 ```
 
 You can also generate h5 files by yourself following these steps:
