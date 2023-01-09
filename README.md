@@ -107,7 +107,7 @@ The dataset has 10 domains, 4000+ classes. Episodes are formed in various-way-va
 The images are stored class-wise in h5 files (converted from the origianl tfrecords, one for each class).
 To train and test on this dataset, set `--dataset meta_dataset` and `--data_path /path/to/meta_dataset`.
 
-To download the h5 files (except for ILSVRC 2012), 
+To download the h5 files, 
 ```
 git clone https://huggingface.co/datasets/hushell/meta_dataset_h5
 ```
