@@ -204,7 +204,7 @@ For `finetune`, a few hyper-parameters are introduced: `args.ada_steps`, `args.a
 
 A meta-testing command example for Meta-Dataset with fine-tuning is 
 ``` 
-python -m torch.distributed.launch --nproc_per_node=8 --use_env test_meta_dataset.py --data-path /path/to/meta_dataset/ --dataset meta_dataset --arch dino_small_patch16 --deploy finetune --output outputs/your_experiment_name --resume outputs/your_experiment_name/best.pth --dist-eval --ada_steps 100 --ada_lr 0.0001 --aug_prob 0.9 --aug_types color transition
+python -m torch.distributed.launch --nproc_per_node=8 --use_env test_meta_dataset.py --data-path /path/to/meta_dataset/ --dataset meta_dataset --arch dino_small_patch16 --deploy finetune --output outputs/your_experiment_name --resume outputs/your_experiment_name/best.pth --dist-eval --ada_steps 100 --ada_lr 0.0001 --aug_prob 0.9 --aug_types color translation
 ``` 
 
 To meta-test without fine-tuning, just replace `--deploy finetune` with `--deploy vanilla`.
@@ -225,6 +225,6 @@ Meta-testing CDFSL is almost the same as described in previous section for Meta-
 
 An meta-testing command example for CDFSL with fine-tuning is
 ```
-python test_bscdfsl.py --test_n_way 5 --n_shot 5 --device cuda:0 --arch dino_small_patch16 --deploy finetune --output outputs/your_experiment_name --resume outputs/your_experiment_name/best.pth --ada_steps 100 --ada_lr 0.0001 --aug_prob 0.9 --aug_types color transition
+python test_bscdfsl.py --test_n_way 5 --n_shot 5 --device cuda:0 --arch dino_small_patch16 --deploy finetune --output outputs/your_experiment_name --resume outputs/your_experiment_name/best.pth --ada_steps 100 --ada_lr 0.0001 --aug_prob 0.9 --aug_types color translation
 ```
 Changing `--n_shot` to 20 or 50 to evaluate other settings.
